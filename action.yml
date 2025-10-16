@@ -23,8 +23,8 @@ runs:
   using: 'docker'
   image: 'Dockerfile'
   env:
-    ANTHROPIC_API_KEY: ${{ inputs.anthropic-api-key }}
-    GITHUB_TOKEN: ${{ inputs.github-token }}
-    GITHUB_REPOSITORY: ${{ github.repository }}
-    PR_NUMBER: ${{ github.event.pull_request.number }}
+    ANTHROPIC_API_KEY: "${{ inputs.anthropic-api-key }}"
+    GITHUB_TOKEN: "${{ inputs.github-token }}"
+    GITHUB_REPOSITORY: "${{ github.repository }}"
+    PR_NUMBER: "${{ github.event.pull_request.number }}"
     RULES_FILE: ${{ inputs.rules-file }}

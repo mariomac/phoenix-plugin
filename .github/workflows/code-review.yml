@@ -16,7 +16,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Run AI Code Review
-        uses: ./
+        uses: mariomac/phoenix-plugin@v0.0.1
         with:
           anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
