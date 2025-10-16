@@ -18,6 +18,14 @@ inputs:
     description: 'Path to the review instructions file in the repository (any text format: Markdown, YAML, plain text, etc.)'
     required: false
     default: '.github/copilot-instructions.md'
+  github-repository:
+    description: 'GitHub repository name'
+    required: false
+    default: ${{ github.repository }}
+  github-pr-number:
+    description: 'GitHub pull request number'
+    required: false
+    default: ${{ github.event.pull_request.number }}
 
 runs:
   using: 'docker'
@@ -25,6 +33,6 @@ runs:
   env:
     ANTHROPIC_API_KEY: "${{ inputs.anthropic-api-key }}"
     GITHUB_TOKEN: "${{ inputs.github-token }}"
-    GITHUB_REPOSITORY: "${{ github.repository }}"
-    PR_NUMBER: "${{ github.event.pull_request.number }}"
+    GITHUB_REPOSITORY: "${{ inputs.github-repository }}"
+    PR_NUMBER: "${{ inputs.github-pr-number }}"
     RULES_FILE: ${{ inputs.rules-file }}
