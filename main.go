@@ -62,7 +62,7 @@ func main() {
 	rules, err := readCopilotInstructions(ctx, ghClient, owner, repo, rulesFile)
 	if err != nil {
 		log.Printf("Warning: Could not read %s: %v", rulesFile, err)
-		rules = "- Check for code quality issues\n- Look for potential bugs\n- Suggest improvements"
+		rules = "- Check for lack of instrumentation\n- Look for metrics attributes that can create cardinality issues\n- Suggest improvements"
 	}
 
 	// Perform code review using Anthropic
@@ -127,7 +127,8 @@ func readCopilotInstructions(ctx context.Context, client *github.Client, owner, 
 func performCodeReview(ctx context.Context, apiKey, diff string, rules string) (string, error) {
 	client := anthropic.NewClient(option.WithAPIKey(apiKey))
 
-	prompt := fmt.Sprintf(`You are a code reviewer. Review the following code changes and provide feedback based EXCLUSIVELY on these rules:
+	prompt := fmt.Sprintf(`You are a code reviewer that is specialized in OpenTelemetry instrumentation.
+Review the following code changes and provide feedback based EXCLUSIVELY on these rules:
 
 %s
 
