@@ -1,0 +1,10 @@
+Code Review Instructions:
+
+1. Check for proper error handling
+2. Verify all functions have documentation
+3. Look for security issues
+4. Check naming conventions
+5. Suggest improvements for readability
+6. Ensure tests are included
+
+Focus on practical, actionable feedback.

@@ -11,12 +11,7 @@ import (
 	"github.com/anthropics/anthropic-sdk-go/option"
 	"github.com/google/go-github/v57/github"
 	"golang.org/x/oauth2"
-	"gopkg.in/yaml.v3"
 )
-
-type ReviewRules struct {
-	Rules []string `yaml:"rules"`
-}
 
 func main() {
 	ctx := context.Background()
@@ -26,6 +21,11 @@ func main() {
 	githubToken := os.Getenv("GITHUB_TOKEN")
 	repoFullName := os.Getenv("GITHUB_REPOSITORY")
 	prNumber := os.Getenv("PR_NUMBER")
+	rulesFile := os.Getenv("RULES_FILE")
+
+	if rulesFile == "" {
+		rulesFile = ".github/copilot-instructions.md"
+	}
 
 	if apiKey == "" || githubToken == "" || repoFullName == "" || prNumber == "" {
 		log.Fatal("Missing required environment variables: ANTHROPIC_API_KEY, GITHUB_TOKEN, GITHUB_REPOSITORY, PR_NUMBER")
@@ -59,10 +59,10 @@ func main() {
 	}
 
 	// Read copilot instructions
-	rules, err := readCopilotInstructions(ctx, ghClient, owner, repo)
+	rules, err := readCopilotInstructions(ctx, ghClient, owner, repo, rulesFile)
 	if err != nil {
-		log.Printf("Warning: Could not read .github/copilot-instructions.yml: %v", err)
-		rules = []string{"Check for code quality issues", "Look for potential bugs", "Suggest improvements"}
+		log.Printf("Warning: Could not read %s: %v", rulesFile, err)
+		rules = "- Check for code quality issues\n- Look for potential bugs\n- Suggest improvements"
 	}
 
 	// Perform code review using Anthropic
@@ -109,34 +109,27 @@ func getPRDiff(ctx context.Context, client *github.Client, owner, repo string, p
 	return diffBuilder.String(), nil
 }
 
-func readCopilotInstructions(ctx context.Context, client *github.Client, owner, repo string) ([]string, error) {
+func readCopilotInstructions(ctx context.Context, client *github.Client, owner, repo, rulesFile string) (string, error) {
 	// Try to get the file from the repository
-	fileContent, _, _, err := client.Repositories.GetContents(ctx, owner, repo, ".github/copilot-instructions.yml", nil)
+	fileContent, _, _, err := client.Repositories.GetContents(ctx, owner, repo, rulesFile, nil)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
 	content, err := fileContent.GetContent()
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	var rules ReviewRules
-	if err := yaml.Unmarshal([]byte(content), &rules); err != nil {
-		return nil, err
-	}
-
-	return rules.Rules, nil
+	return content, nil
 }
 
-func performCodeReview(ctx context.Context, apiKey, diff string, rules []string) (string, error) {
+func performCodeReview(ctx context.Context, apiKey, diff string, rules string) (string, error) {
 	client := anthropic.NewClient(option.WithAPIKey(apiKey))
-
-	rulesText := strings.Join(rules, "\n- ")
 
 	prompt := fmt.Sprintf(`You are a code reviewer. Review the following code changes and provide feedback based EXCLUSIVELY on these rules:
 
-- %s
+%s
 
 Code changes:
 %s
@@ -146,7 +139,7 @@ Provide a concise review with:
 2. Specific suggestions for improvement (if applicable)
 3. Line references where relevant
 
-If no issues are found, simply say "No issues found based on the review rules."`, rulesText, diff)
+If no issues are found, simply say "No issues found based on the review rules."`, rules, diff)
 
 	message, err := client.Messages.New(ctx, anthropic.MessageNewParams{
 		Model:     anthropic.ModelClaudeHaiku4_5,

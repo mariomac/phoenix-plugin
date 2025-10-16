@@ -1,5 +1,5 @@
 name: 'AI Code Review with Claude'
-description: 'Automated code review using Claude AI and custom review rules from .github/copilot-instructions.yml'
+description: 'Automated code review using Claude AI with custom review instructions from any text-based file'
 author: 'Anthropic'
 
 branding:
@@ -14,6 +14,10 @@ inputs:
     description: 'GitHub token for API access'
     required: true
     default: ${{ github.token }}
+  rules-file:
+    description: 'Path to the review instructions file in the repository (any text format: Markdown, YAML, plain text, etc.)'
+    required: false
+    default: '.github/copilot-instructions.md'
 
 runs:
   using: 'docker'
@@ -23,3 +27,4 @@ runs:
     GITHUB_TOKEN: ${{ inputs.github-token }}
     GITHUB_REPOSITORY: ${{ github.repository }}
     PR_NUMBER: ${{ github.event.pull_request.number }}
+    RULES_FILE: ${{ inputs.rules-file }}

@@ -5,7 +5,7 @@ This GitHub Action performs automated code reviews on pull requests using Claude
 ## Features
 
 - **Automatic PR Analysis**: Detects changes in pull requests and performs intelligent code review
-- **Custom Review Rules**: Reads rules from `.github/copilot-instructions.yml` in your repository
+- **Custom Review Rules**: Reads rules from `.github/copilot-instructions.md` in your repository
 - **AI-Powered Suggestions**: Uses Claude to provide specific code improvement suggestions
 - **Inline Feedback**: Posts review comments directly on the pull request
 
@@ -22,19 +22,20 @@ Add your Anthropic API key as a repository secret:
 
 ### 2. Create Review Rules
 
-Create a `.github/copilot-instructions.yml` file in your repository with your review rules:
+Create a `.github/copilot-instructions.md` file in your repository with your review rules. The entire file content will be passed to Claude as instructions, so you can use any format (Markdown, plain text, etc.):
 
-```yaml
-rules:
-  - Check for proper error handling and ensure errors are not silently ignored
-  - Ensure all public functions and methods have documentation comments
-  - Look for potential security vulnerabilities (SQL injection, XSS, hardcoded credentials)
-  - Verify proper variable and function naming conventions following the project style guide
-  - Check for code duplication and suggest refactoring opportunities
-  - Ensure new features include appropriate unit tests
+```markdown
+# Code Review Rules
+
+- Check for proper error handling and ensure errors are not silently ignored
+- Ensure all public functions and methods have documentation comments
+- Look for potential security vulnerabilities (SQL injection, XSS, hardcoded credentials)
+- Verify proper variable and function naming conventions following the project style guide
+- Check for code duplication and suggest refactoring opportunities
+- Ensure new features include appropriate unit tests
 ```
 
-See [examples/copilot-instructions.yml](examples/copilot-instructions.yml) for a complete example.
+See [examples/copilot-instructions.md](examples/copilot-instructions.md) for more examples.
 
 ### 3. Add Workflow to Your Repository
 
@@ -65,6 +66,19 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 ```
 
+**Custom rules file path:**
+
+If you want to use a different path for your rules file:
+
+```yaml
+      - name: Run AI Code Review
+        uses: mariomac/phoenix-plugin@main
+        with:
+          anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          rules-file: 'docs/review-rules.yml'
+```
+
 The action will automatically run on:
 - New pull requests
 - Updated pull requests
@@ -74,10 +88,12 @@ The action will automatically run on:
 
 1. When a PR is created or updated, the action triggers
 2. It fetches the PR diff to see what changed
-3. It reads your custom review rules from `.github/copilot-instructions.yml`
-4. It sends the diff and rules to Claude AI for analysis
-5. Claude reviews the code based exclusively on your specified rules
+3. It reads the complete content of your rules file (default: `.github/copilot-instructions.md`)
+4. It sends the diff and the entire rules file content to Claude AI for analysis
+5. Claude reviews the code based exclusively on the instructions in your rules file
 6. The review is posted as a comment on the PR
+
+**Note:** The action reads and passes the complete file content as-is to Claude, allowing you to write your review instructions in any format that works best for your team (structured Markdown, simple bullet points, detailed documentation, etc.).
 
 ## Requirements
 
@@ -91,6 +107,9 @@ The action will automatically run on:
 |-------|-------------|----------|---------|
 | `anthropic-api-key` | Anthropic API key for Claude access | Yes | - |
 | `github-token` | GitHub token for API access | Yes | `${{ github.token }}` |
+| `rules-file` | Path to the rules file in the repository (any text format) | No | `.github/copilot-instructions.md` |
+
+**Note:** The entire content of the rules file is passed directly to Claude as instructions. You can use any text-based format: Markdown, plain text, or structured documentation.
 
 ## Environment Variables
 

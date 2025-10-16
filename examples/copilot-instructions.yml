@@ -1,0 +1,41 @@
+# Code Review Guidelines
+
+## Core Principles
+Review code changes with focus on quality, security, and maintainability.
+
+## Specific Rules
+
+### Error Handling
+- Check for proper error handling and ensure errors are not silently ignored
+- Verify error messages are descriptive and actionable
+
+### Documentation
+- Ensure all public functions and methods have documentation comments
+- Check that complex logic includes inline comments
+
+### Security
+- Look for potential security vulnerabilities:
+  - SQL injection risks
+  - Cross-site scripting (XSS)
+  - Hardcoded credentials or secrets
+  - Improper input validation
+- Ensure API endpoints have proper authentication and authorization
+
+### Code Quality
+- Verify proper variable and function naming conventions following the project style guide
+- Check for code duplication and suggest refactoring opportunities
+- Look for overly complex functions that should be broken down
+
+### Testing
+- Ensure new features include appropriate unit tests
+- Verify edge cases are covered in tests
+
+### Dependencies
+- Verify that dependencies are up-to-date and do not have known vulnerabilities
+
+### Concurrency
+- Look for race conditions in concurrent code
+- Check proper use of synchronization primitives
+
+### Logging
+- Check for proper logging at appropriate levels (debug, info, warning, error)
