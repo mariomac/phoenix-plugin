@@ -26,17 +26,46 @@ Create a `.github/copilot-instructions.yml` file in your repository with your re
 
 ```yaml
 rules:
-  - Check for proper error handling
-  - Ensure all functions have documentation comments
-  - Look for security vulnerabilities
-  - Verify proper variable naming conventions
-  - Check for code duplication
-  - Ensure tests are included for new features
+  - Check for proper error handling and ensure errors are not silently ignored
+  - Ensure all public functions and methods have documentation comments
+  - Look for potential security vulnerabilities (SQL injection, XSS, hardcoded credentials)
+  - Verify proper variable and function naming conventions following the project style guide
+  - Check for code duplication and suggest refactoring opportunities
+  - Ensure new features include appropriate unit tests
 ```
 
-### 3. Copy the Workflow
+See [examples/copilot-instructions.yml](examples/copilot-instructions.yml) for a complete example.
 
-The GitHub Action workflow is already set up in `.github/workflows/code-review.yml`. It will automatically run on:
+### 3. Add Workflow to Your Repository
+
+Create a `.github/workflows/code-review.yml` file in your repository:
+
+```yaml
+name: AI Code Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  code-review:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run AI Code Review
+        uses: mariomac/phoenix-plugin@main
+        with:
+          anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+```
+
+The action will automatically run on:
 - New pull requests
 - Updated pull requests
 - Reopened pull requests
@@ -54,14 +83,21 @@ The GitHub Action workflow is already set up in `.github/workflows/code-review.y
 
 - Anthropic API key with access to Claude models
 - GitHub Actions enabled on your repository
-- Go 1.21 or later (handled automatically by the action)
+- Docker support in GitHub Actions (enabled by default)
+
+## Action Inputs
+
+| Input | Description | Required | Default |
+|-------|-------------|----------|---------|
+| `anthropic-api-key` | Anthropic API key for Claude access | Yes | - |
+| `github-token` | GitHub token for API access | Yes | `${{ github.token }}` |
 
 ## Environment Variables
 
-The action uses these environment variables (automatically set by GitHub Actions):
+The action automatically configures these environment variables:
 
-- `ANTHROPIC_API_KEY`: Your Anthropic API key (secret)
-- `GITHUB_TOKEN`: GitHub token for API access (automatic)
+- `ANTHROPIC_API_KEY`: Your Anthropic API key (from inputs)
+- `GITHUB_TOKEN`: GitHub token for API access (from inputs)
 - `GITHUB_REPOSITORY`: Repository name (automatic)
 - `PR_NUMBER`: Pull request number (automatic)
 

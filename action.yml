@@ -1,0 +1,25 @@
+name: 'AI Code Review with Claude'
+description: 'Automated code review using Claude AI and custom review rules from .github/copilot-instructions.yml'
+author: 'Anthropic'
+
+branding:
+  icon: 'check-circle'
+  color: 'orange'
+
+inputs:
+  anthropic-api-key:
+    description: 'Anthropic API key for Claude access'
+    required: true
+  github-token:
+    description: 'GitHub token for API access'
+    required: true
+    default: ${{ github.token }}
+
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+  env:
+    ANTHROPIC_API_KEY: ${{ inputs.anthropic-api-key }}
+    GITHUB_TOKEN: ${{ inputs.github-token }}
+    GITHUB_REPOSITORY: ${{ github.repository }}
+    PR_NUMBER: ${{ github.event.pull_request.number }}

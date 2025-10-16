@@ -1,4 +1,4 @@
-module github.com/grafana/phoenix-plugin
+module github.com/mariomac/phoenix-plugin
 
 go 1.25.3
 
